@@ -1,13 +1,21 @@
 class Test {
-    private void main(String[] args) {
+    public void main(String[] args) {
         int a = 3, s=10,
             b = 10;
 
         double c = a + 3;
 
+        SomeClass test = new SomeClass(a);
 
-        if ((a)<(b+3)&&c>a) {
-            System.console.out("here is something!");
+        a.InnerClass b = new a.InnerClass( test );
+
+        for (int i=0; i<3; i+=1) {
+            b %=1;
+        }
+
+        if (((a)<(b+3)&&c>a) || (a++ > !b)) {
+            System.console.out( a.somemethod("here is something!") );
+            b--;
         }
 
         return a;
