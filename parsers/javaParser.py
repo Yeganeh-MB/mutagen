@@ -5,40 +5,55 @@ class JavaParser:
     """
     Parser for Java code file.
     Remembers variables declared in the file.
-    Each parsed line
     """
 
-    # # constants for comparison during parsing
-    # _JAVA_KEYWORDS = ('for', 'while')
-    # _JAVA_TYPES = ('boolean', 'int', 'double', 'float')
-    # _JAVA_OPERATORS =  ('+', '-', '/', '*', '%',
-    #                     '>', '<', '<=', '>=', '==', '!=',
-    #                     '&&', '||')
+    def parse(self, file):
+        _OPERANDS = ('+', '-', '*', '/', '%', '>', '<', '=', '&', '|', '!')
+        _SKIP = ('(', ')', '{', '}', ' ', '\n', '\t')
+        _DELIMITERS = (',', ';')
+        words = []
 
-    def __init__(self, file):
-        self.file = file
-        self.fileHandler = None
-        # self.variables = {}
+        with open(file, 'r', encoding = 'utf-8') as src:
+            char = src.read(1)
 
-    #TODO: implement via decorator
-    def __enter__(self):
-        try:
-            self.fileHandler = open(self.file, 'r', encoding = 'utf-8')
-        except FileNotFoundError:
-            print('File {0} does not exist. Please, check the path.'.format(self.file))
-        return self
+            while True:
+                word = ''
 
-    #TODO: implement via decorator
-    def __exit__(self, type, value, traceback):
-        if self.fileHandler:
-            self.fileHandler.close()
+                while char in _SKIP:
+                    char = src.read(1)
 
-    def parseLines(self):
-        if self.fileHandler:
-            for line in self.fileHandler:
-                yield self._parse(line)
+                if char and char == ',':
+                    word += char
+                    char = src.read(1)
+                elif char and char == '"':
+                    char = src.read(1)
+
+                    while char and char != '"':
+                        char = src.read(1)
+
+                    char = src.read(1)
+                elif char and char in _OPERANDS:
+                    while char and char in _OPERANDS:
+                        word += char
+                        char = src.read(1)
+                elif char and char in _DELIMITERS:
+                    word += char
+                    char = src.read(1)
+                elif char:
+                    while char and char not in _OPERANDS and char not in _SKIP and char not in _DELIMITERS:
+                        word += char
+                        char = src.read(1)
+                else: # end of file...
+                    break
+
+                if word:
+                    print(word)
+                    words.append(word)
+
+        return words
 
 
-    def _parse(self, line):
-        line = line.strip()
-        return (line, len(line))
+if __name__ == '__main__':
+    parser = JavaParser()
+
+    parser.parse('test.txt');
