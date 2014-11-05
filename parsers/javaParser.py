@@ -127,8 +127,3 @@ class JavaParser:
                 addTokenToDict(others, token)
 
         return {'types': types, 'operators': operators, 'tokens': others}
-
-if __name__ == '__main__':
-    parser = JavaParser()
-    print( parser.parse('test.txt') )
-    # print('types: {0}\noperators: {1}\nother: {2}'.format(a,b,c))
