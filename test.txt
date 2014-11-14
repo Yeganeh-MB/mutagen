@@ -3,6 +3,9 @@ class Test {
         int a = 3, s=10,
             b = 10;
 
+        int[] arr = new int[3];
+        arr[0] = 1;
+
         double c = a + 3;
 
         SomeClass test = new SomeClass(a);

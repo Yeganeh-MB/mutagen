@@ -1,5 +1,6 @@
 __author__ = 'Velz'
 
+import re
 
 class JavaParser:
     """
@@ -8,9 +9,8 @@ class JavaParser:
 
     def parse(self, file):
         tokens = self.tokenize(file)
-        return tokens
-        # structure = self.analyze(tokens)
-        # return structure
+        structure = self.analyze(tokens)
+        return structure
 
     # TODO: add power operator...
     def tokenize(self, file):
@@ -78,7 +78,11 @@ class JavaParser:
         analyzes the parsed structure and separates variables with
         their names, variables occurrences, and target operators
         """
-        OPERATORS = ('==', '!=', '>', '<', '>=', '<=', '+', '-', '*', '/', '%', '!', '&&', '||')
+        OPERATORS = ('==', '!=', '>', '<', '>=', '<=', '=',
+                     '+', '-', '*', '/', '%',
+                     '+=', '-=', '*=', '/=', '%=',
+                     '++', '--',
+                     '!', '&&', '||', '&=', '|=')
         RESERVED = ('abstract', 'assert', 'break', 'case', 'catch', 'char', 'class',
                     'const', 'continue', 'default', 'do', 'else', 'enum', 'extends',
                     'final', 'finally', 'for', 'goto', 'if', 'implements', 'instanceof',
@@ -86,9 +90,13 @@ class JavaParser:
                     'public', 'return', 'static', 'strictfp', 'super', 'switch', 'this',
                     'synchronized', 'throw', 'throws', 'transient', 'try', 'void', 'violate',
                     'while')
+        stringRe = re.compile('^"(.*)"$')
+        numberRe = re.compile('^(\d+).?(\d*)')
         types = {}
         operators = {}
-        others = {}
+        strings = {}
+        numbers = {}
+        other = {}
         currentType = None
         expectDeclaration = False
 
@@ -101,8 +109,8 @@ class JavaParser:
                         names of variables start with a small letter
                         names of methods start with a small letter
             """
-            _PRIMITIVE_TYPES = ('int', 'float', 'double', 'boolean', 'byte', 'long', 'short',
-                                'int[]', 'float[]', 'double[]', 'boolean[]', 'byte[]', 'long[]', 'short[]')
+            _PRIMITIVE_TYPES = ('int', 'float', 'double', 'boolean', 'byte', 'long', 'short', 'String',
+                                'int[]', 'float[]', 'double[]', 'boolean[]', 'byte[]', 'long[]', 'short[]', 'String[]')
             return name in _PRIMITIVE_TYPES
 
         def addTokenToDict(dict, token):
@@ -128,7 +136,11 @@ class JavaParser:
             elif currentType and token[0] == ';':
                 currentType = False
                 expectDeclaration = False
+            elif stringRe.match(token[0]):
+                addTokenToDict(strings, token)
+            elif numberRe.match(token[0]):
+                addTokenToDict(numbers, token)
             elif token[0] not in RESERVED:
-                addTokenToDict(others, token)
+                addTokenToDict(other, token)
 
-        return {'types': types, 'operators': operators, 'tokens': others}
+        return {'types': types, 'operators': operators, 'strings': strings, 'numbers': numbers, 'tokens': other}
