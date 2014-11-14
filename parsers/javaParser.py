@@ -8,8 +8,9 @@ class JavaParser:
 
     def parse(self, file):
         tokens = self.tokenize(file)
-        structure = self.analyze(tokens)
-        return structure
+        return tokens
+        # structure = self.analyze(tokens)
+        # return structure
 
     # TODO: add power operator...
     def tokenize(self, file):
@@ -19,6 +20,7 @@ class JavaParser:
         OPERANDS = ('+', '-', '*', '/', '%', '>', '<', '=', '&', '|', '!')
         SKIP = ('(', ')', '{', '}', ' ', '\n', '\t')
         DELIMITERS = (',', ';')
+        ARRAY_BRACKETS = ('[', ']')
         tokens = []
 
         with open(file, 'r', encoding = 'utf-8') as src:
@@ -26,12 +28,11 @@ class JavaParser:
 
             while True:
                 token = ''
-                position = 0
 
                 while char in SKIP:
                     char = src.read(1)
 
-                if char and char == ',':
+                if char and char in DELIMITERS:
                     position = src.tell()
                     token += char
                     char = src.read(1)
@@ -52,16 +53,19 @@ class JavaParser:
                     while char and char in OPERANDS:
                         token += char
                         char = src.read(1)
-                elif char and char in DELIMITERS:
-                    position = src.tell()
-                    token += char
-                    char = src.read(1)
                 elif char:
                     position = src.tell()
 
                     while char and char not in OPERANDS and char not in SKIP and char not in DELIMITERS:
                         token += char
                         char = src.read(1)
+
+                    arrayOpenBracket, arrayCloseBracket = token.find('['), token.find(']')
+                    if arrayCloseBracket > arrayOpenBracket + 1:
+                        tokens.append([token[:arrayOpenBracket], position])
+                        position = arrayOpenBracket + 1
+                        token = token[position:arrayCloseBracket]
+
                 else: # end of file...
                     break
 
@@ -97,7 +101,8 @@ class JavaParser:
                         names of variables start with a small letter
                         names of methods start with a small letter
             """
-            _PRIMITIVE_TYPES = ('int', 'float', 'double', 'boolean', 'byte', 'long', 'short')
+            _PRIMITIVE_TYPES = ('int', 'float', 'double', 'boolean', 'byte', 'long', 'short',
+                                'int[]', 'float[]', 'double[]', 'boolean[]', 'byte[]', 'long[]', 'short[]')
             return name in _PRIMITIVE_TYPES
 
         def addTokenToDict(dict, token):
